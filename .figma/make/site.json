@@ -1,0 +1,10 @@
+{
+  "description": "Monitor news sources, review AI-grouped events and concise summaries, and configure a daily email digest to stay informed with less reading.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
