@@ -24,3 +24,5 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+.neon
+neon.ts
