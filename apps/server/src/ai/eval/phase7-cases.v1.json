@@ -1,0 +1,90 @@
+{
+  "version": "phase7-real-cases-v1",
+  "description": "AI quality regression cases built from real articles collected in the Phase 7 real-news E2E run (2026-11-11..13). Public news titles/excerpts/URLs only; no credentials or user data. Articles in a case are processed in the listed order; `expect` applies to that article's clustering decision.",
+  "cases": [
+    {
+      "id": "case-001",
+      "type": "false_merge",
+      "description": "Phase 7 merged a US aircraft relocation in the UK with an Iranian threat against US bases in Europe and titled the Event with an unsupported cause.",
+      "articles": [
+        { "ref": "b1716d7a", "source": "VnExpress", "feedLanguage": null, "language": "vi", "url": "https://vnexpress.net/iran-doa-tan-cong-can-cu-my-o-chau-au-5143612.html", "publishedAt": "2026-11-11T23:51:12Z", "title": "Iran dọa tấn công căn cứ Mỹ ở châu Âu", "excerpt": "Quan chức an ninh hàng đầu Iran Mohsen Rezaei đe dọa tập kích căn cứ Mỹ ngoài Trung Đông, kể cả ở châu Âu, nếu chúng được dùng để tấn công nước này." },
+        { "ref": "6f4a03ac", "source": "VTV", "feedLanguage": "vi-vn", "language": "vi", "url": "https://vtv.vn/my-di-chuyen-may-bay-khoi-can-cu-o-anh-100261111105939597.htm", "publishedAt": "2026-11-11T05:23:00Z", "title": "Mỹ di chuyển máy bay khỏi căn cứ ở Anh", "excerpt": "VTV.vn - Không quân Mỹ đã điều chuyển 13 máy bay khỏi một căn cứ ở miền Đông nước Anh sau khi xuất hiện mối đe dọa an ninh.", "expect": "not_merge" }
+      ],
+      "phase7Observed": { "decision": "merge", "titleVi": "Không quân Mỹ di chuyển máy bay tại Anh sau cảnh báo từ Iran" }
+    },
+    {
+      "id": "case-002",
+      "type": "same_event",
+      "description": "Missed merge in Phase 7: the first day of the Russia-US-Ukraine talks in Abu Dhabi stayed separate from the talks' Event (candidate pool cut it off).",
+      "articles": [
+        { "ref": "021a0dc9", "source": "VTV", "feedLanguage": "vi-vn", "language": "vi", "url": "https://vtv.vn/nga-my-va-ukraine-noi-lai-dam-phan-ba-ben-tai-uae-100261110230938525.htm", "publishedAt": "2026-11-11T01:03:00Z", "title": "Nga, Mỹ và Ukraine nối lại đàm phán ba bên tại UAE", "excerpt": "VTV.vn - Ngày 10/11, Nga, Mỹ và Ukraine nối lại đàm phán trực tiếp tại Abu Dhabi, trong khi bất đồng về lãnh thổ và bảo đảm an ninh vẫn còn lớn." },
+        { "ref": "f93772a3", "source": "VTV", "feedLanguage": "vi-vn", "language": "vi", "url": "https://vtv.vn/nga-my-va-ukraine-ket-thuc-ngay-dam-phan-dau-tien-tai-uae-100261111105511203.htm", "publishedAt": "2026-11-11T04:00:00Z", "title": "Nga, Mỹ và Ukraine kết thúc ngày đàm phán đầu tiên tại UAE", "excerpt": "VTV.vn - Sau ngày đàm phán đầu tiên tại Abu Dhabi, đặc phái viên Mỹ cho biết Nga, Mỹ và Ukraine đã thảo luận cách thu hẹp bất đồng để chấm dứt xung đột.", "expect": "merge", "sameEventAs": "021a0dc9" }
+      ],
+      "phase7Observed": { "decision": "new_event" }
+    },
+    {
+      "id": "case-003",
+      "type": "cross_language",
+      "description": "Missed merge in Phase 7 (English + Vietnamese): US Treasury Secretary Bessent moving onto a military base over alleged Iranian threats.",
+      "articles": [
+        { "ref": "2bd57f08", "source": "BBC News", "feedLanguage": "en-gb", "language": "en", "url": "https://www.bbc.co.uk/news/articles/cqr7gr0010r2o?at_medium=RSS&at_campaign=rss", "publishedAt": "2026-11-11T16:45:11Z", "title": "US Treasury Secretary Scott Bessent relocated after alleged Iranian threats", "excerpt": "Bessent is now one of several Trump administration officials to live on military bases due to safety concerns." },
+        { "ref": "a2e77bd8", "source": "VnExpress", "feedLanguage": null, "language": "vi", "url": "https://vnexpress.net/bo-truong-my-don-vao-can-cu-quan-su-vi-lo-ngai-iran-5143401.html", "publishedAt": "2026-11-11T08:28:04Z", "title": "Bộ trưởng Mỹ 'dọn vào căn cứ quân sự' vì lo ngại Iran", "excerpt": "Bộ trưởng Tài chính Mỹ dường như đã chuyển vào sống trong một căn cứ quân sự vì nguy cơ \"bị Iran đe dọa tính mạng\".", "expect": "merge", "sameEventAs": "2bd57f08" }
+      ],
+      "phase7Observed": { "decision": "new_event" }
+    },
+    {
+      "id": "case-004",
+      "type": "cross_language",
+      "description": "English + Vietnamese + Japanese reports of the guard reprimanding Defence Secretary Hegseth's group at Arlington (merged correctly in Phase 7).",
+      "articles": [
+        { "ref": "91ee5515", "source": "BBC News", "feedLanguage": "en-gb", "language": "en", "url": "https://www.bbc.co.uk/news/videos/ck5y132yq1ymo?at_medium=RSS&at_campaign=rss", "publishedAt": "2026-11-11T21:43:35Z", "title": "Hegseth and advisers reprimanded by guard at Tomb of the Unknown Soldier", "excerpt": "Following a ceremony marking Veterans Day, a group that included Defence Secretary Pete Hegseth was shouted at to be quiet." },
+        { "ref": "5f41e361", "source": "VnExpress", "feedLanguage": null, "language": "vi", "url": "https://vnexpress.net/ong-hegseth-bi-tieu-binh-chan-chinh-khi-tham-nghia-trang-quoc-gia-5143619.html", "publishedAt": "2026-11-12T01:00:55Z", "title": "Ông Hegseth bị tiêu binh chấn chỉnh khi thăm nghĩa trang quốc gia", "excerpt": "Bộ trưởng Quốc phòng Pete Hegseth và đoàn cố vấn bị tiêu binh chấn chỉnh tác phong do tiếng cười nói tại Nghĩa trang Quốc gia Arlington.", "expect": "merge", "sameEventAs": "91ee5515" },
+        { "ref": "f56f8657", "source": "Yahoo!ニュース", "feedLanguage": "ja", "language": "ja", "url": "https://news.yahoo.co.jp/pickup/6602354?source=rss", "publishedAt": "2026-11-12T14:26:32Z", "title": "米国防長官ら 墓地で衛兵から叱責", "excerpt": null, "expect": "merge", "sameEventAs": "91ee5515" }
+      ],
+      "phase7Observed": { "decision": "merge" }
+    },
+    {
+      "id": "case-005",
+      "type": "different_event",
+      "description": "Same country and topic (Iranian missiles) but two different events: production capacity vs a newly unveiled weapon.",
+      "articles": [
+        { "ref": "e03576e0", "source": "VnExpress", "feedLanguage": null, "language": "vi", "url": "https://vnexpress.net/iran-xuat-xuong-50-ten-lua-moi-thang-bat-chap-ton-that-chien-su-5143273.html", "publishedAt": "2026-11-11T07:33:00Z", "title": "Iran 'xuất xưởng 50 tên lửa mỗi tháng' bất chấp tổn thất chiến sự", "excerpt": "Iran dường như còn ít nhất 1.700 tên lửa đạn đạo và có thể sản xuất khoảng 50 quả mỗi tháng, bất chấp chịu nhiều thiệt hại trong xung đột." },
+        { "ref": "5af5690e", "source": "VnExpress", "feedLanguage": null, "language": "vi", "url": "https://vnexpress.net/iran-he-lo-vu-khi-giong-ten-lua-hanh-trinh-tang-hinh-cua-my-5143748.html", "publishedAt": "2026-11-12T07:20:32Z", "title": "Iran hé lộ vũ khí giống tên lửa hành trình tàng hình của Mỹ", "excerpt": "Iran công bố quả đạn được cho là biến thể thuộc dòng Paveh, với hình dáng giống tên lửa hành trình tàng hình AGM-158 JASSM của Mỹ.", "expect": "not_merge" }
+      ],
+      "phase7Observed": { "decision": "new_event" }
+    },
+    {
+      "id": "case-006",
+      "type": "different_event",
+      "description": "Unrelated events sharing only the word \"Mỹ\"/US: a flooded passenger cabin on a Frontier flight vs the Treasury Secretary's relocation.",
+      "articles": [
+        { "ref": "981d9942", "source": "VnExpress", "feedLanguage": null, "language": "vi", "url": "https://vnexpress.net/may-bay-my-ha-canh-khan-vi-khoang-hanh-khach-ngap-nuoc-5143754.html", "publishedAt": "2026-11-12T04:51:47Z", "title": "Máy bay Mỹ hạ cánh khẩn vì khoang hành khách ngập nước", "excerpt": "Máy bay chở khách của hãng Frontier phải hạ cánh khẩn xuống Chicago sau khi bồn rửa trong nhà vệ sinh bị vỡ vòi nước, làm ngập khoang hành khách." },
+        { "ref": "2bd57f08", "source": "BBC News", "feedLanguage": "en-gb", "language": "en", "url": "https://www.bbc.co.uk/news/articles/cqr7gr0010r2o?at_medium=RSS&at_campaign=rss", "publishedAt": "2026-11-11T16:45:11Z", "title": "US Treasury Secretary Scott Bessent relocated after alleged Iranian threats", "excerpt": "Bessent is now one of several Trump administration officials to live on military bases due to safety concerns.", "expect": "not_merge" }
+      ],
+      "phase7Observed": { "decision": "new_event" }
+    },
+    {
+      "id": "case-007",
+      "type": "causal_claim",
+      "description": "The aircraft article never mentions Iran; Phase 7's Event title claimed the move followed an Iranian warning.",
+      "articles": [
+        { "ref": "6f4a03ac", "source": "VTV", "feedLanguage": "vi-vn", "language": "vi", "url": "https://vtv.vn/my-di-chuyen-may-bay-khoi-can-cu-o-anh-100261111105939597.htm", "publishedAt": "2026-11-11T05:23:00Z", "title": "Mỹ di chuyển máy bay khỏi căn cứ ở Anh", "excerpt": "VTV.vn - Không quân Mỹ đã điều chuyển 13 máy bay khỏi một căn cứ ở miền Đông nước Anh sau khi xuất hiện mối đe dọa an ninh." }
+      ],
+      "forbiddenTerms": ["Iran"],
+      "phase7Observed": { "titleVi": "Không quân Mỹ di chuyển máy bay tại Anh sau cảnh báo từ Iran" }
+    },
+    {
+      "id": "case-008",
+      "type": "filler_summary",
+      "description": "Thin single-article input; Phase 7 padded the summary with filler and an unsupported expectation.",
+      "articles": [
+        { "ref": "012d4289", "source": "VTV", "feedLanguage": "vi-vn", "language": "vi", "url": "https://vtv.vn/cop31-thuc-day-hanh-dong-khi-hau-100261112060934376.htm", "publishedAt": "2026-11-12T02:50:00Z", "title": "COP31 thúc đẩy hành động khí hậu", "excerpt": "VTV.vn - Nhiều nhà lãnh đạo thế giới hôm 11/11 đã tới Thổ Nhĩ Kỳ để tham dự Hội nghị lần thứ 31 các bên tham gia Công ước khung của Liên hợp quốc về biến đổi khí hậu (COP31)." }
+      ],
+      "forbiddenTerms": ["kỳ vọng"],
+      "phase7Observed": {
+        "titleVi": "Nhiều nhà lãnh đạo thế giới tham dự Hội nghị COP31 tại Thổ Nhĩ Kỳ",
+        "summaryVi": "Nhiều nhà lãnh đạo thế giới đã đến Thổ Nhĩ Kỳ để tham dự Hội nghị lần thứ 31 các bên tham gia Công ước khung của Liên hợp quốc về biến đổi khí hậu (COP31). Hội nghị này nhằm thúc đẩy các hành động khí hậu toàn cầu trong bối cảnh biến đổi khí hậu diễn biến phức tạp. Sự kiện thu hút sự quan tâm lớn của cộng đồng quốc tế với kỳ vọng đưa ra các quyết sách quan trọng."
+      }
+    }
+  ]
+}

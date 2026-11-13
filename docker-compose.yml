@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aidnd-postgres-local
+    environment:
+      POSTGRES_DB: aidnd
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - aidnd_pg_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aidnd"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  aidnd_pg_data:

@@ -3,6 +3,7 @@ dist/
 build/
 .cache/
 .env*
+!.env.example
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
@@ -11,6 +12,10 @@ logs/
 *.log
 .claude-replay.*
 .tmp-*
+
+# Local manual-verification artifacts (may contain session tokens)
+/*cookies*.txt
+/*headers*.txt
 /.figma/design-context/
 
 # Platform-managed agentplat state, not project source. In the

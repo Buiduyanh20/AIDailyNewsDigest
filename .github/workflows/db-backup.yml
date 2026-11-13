@@ -1,0 +1,75 @@
+# Daily logical backup of the production Neon database (Phase 9).
+#
+# - Runs at 03:00 JST (18:00 UTC; Asia/Tokyo has no DST) — outside the 05:30–07:00 digest window.
+# - pg_dump custom format → encrypted with AES-256 (gpg, passphrase secret) → uploaded as a
+#   workflow artifact kept for 14 days. The dump is never uploaded unencrypted.
+# - Required repository secrets (Settings → Secrets and variables → Actions):
+#     NEON_BACKUP_DATABASE_URL  Neon connection string (direct, sslmode=require); read-only role recommended
+#     BACKUP_PASSPHRASE         long random passphrase; store a copy outside GitHub (needed to restore)
+# - Optional repository variable: PG_MAJOR (default 17) = the Neon project's Postgres major version.
+# Restore procedure: docs/deployment.md → "Backup and restore".
+name: db-backup
+
+on:
+  schedule:
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PG_MAJOR: ${{ vars.PG_MAJOR || '17' }}
+    steps:
+      - name: Check configuration
+        env:
+          NEON_BACKUP_DATABASE_URL: ${{ secrets.NEON_BACKUP_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$NEON_BACKUP_DATABASE_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::NEON_BACKUP_DATABASE_URL and BACKUP_PASSPHRASE secrets are required."
+            exit 1
+          fi
+
+      - name: Install PostgreSQL client ${{ env.PG_MAJOR }}
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y >/dev/null
+          sudo apt-get install -y --no-install-recommends "postgresql-client-${PG_MAJOR}" >/dev/null
+          "/usr/lib/postgresql/${PG_MAJOR}/bin/pg_dump" --version
+
+      - name: Dump and encrypt
+        env:
+          DATABASE_URL: ${{ secrets.NEON_BACKUP_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          umask 077
+          stamp="$(TZ=Asia/Tokyo date +%Y%m%d-%H%M)"
+          echo "STAMP=${stamp}" >> "$GITHUB_ENV"
+          "/usr/lib/postgresql/${PG_MAJOR}/bin/pg_dump" --dbname="$DATABASE_URL" \
+            --format=custom --no-owner --no-acl --file="aidnd-${stamp}.dump"
+          "/usr/lib/postgresql/${PG_MAJOR}/bin/pg_restore" --list "aidnd-${stamp}.dump" > /dev/null
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 3 \
+            --symmetric --cipher-algo AES256 --output "aidnd-${stamp}.dump.gpg" "aidnd-${stamp}.dump" \
+            3<<<"$BACKUP_PASSPHRASE"
+          rm -f "aidnd-${stamp}.dump"
+          sha256sum "aidnd-${stamp}.dump.gpg" > "aidnd-${stamp}.dump.gpg.sha256"
+          ls -l aidnd-*
+
+      - name: Upload encrypted backup (14-day retention)
+        uses: actions/upload-artifact@v4
+        with:
+          name: aidnd-db-${{ env.STAMP }}
+          path: |
+            aidnd-*.dump.gpg
+            aidnd-*.dump.gpg.sha256
+          retention-days: 14
+          if-no-files-found: error
