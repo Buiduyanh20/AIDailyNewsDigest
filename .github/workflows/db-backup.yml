@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      PG_MAJOR: ${{ vars.PG_MAJOR || '17' }}
+      PG_MAJOR: ${{ vars.PG_MAJOR || '18' }}
     steps:
       - name: Check configuration
         env:
