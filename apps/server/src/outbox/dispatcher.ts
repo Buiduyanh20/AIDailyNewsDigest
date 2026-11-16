@@ -83,10 +83,10 @@ export class OutboxDispatcher {
   private async dispatchBatch(): Promise<number> {
     const handledTypes = Object.keys(this.handlers);
     const claimed = await this.query<ClaimedRow>(
-      `UPDATE outbox_events
+      `UPDATE public.outbox_events
        SET status = 'dispatching', attempt_count = attempt_count + 1, updated_at = now()
        WHERE id IN (
-         SELECT id FROM outbox_events
+         SELECT id FROM public.outbox_events
          WHERE event_type = ANY($2::text[])
            AND ((status = 'pending' AND available_at <= now())
                 OR (status = 'dispatching' AND updated_at < now() - make_interval(mins => $3::int)))
@@ -103,7 +103,7 @@ export class OutboxDispatcher {
       try {
         await this.handlers[row.eventType]!(row.payload);
         await this.query(
-          `UPDATE outbox_events SET status = 'dispatched', processed_at = now(), last_error_code = NULL, updated_at = now()
+         `UPDATE public.outbox_events SET status = 'dispatched', processed_at = now(), last_error_code = NULL, updated_at = now()
            WHERE id = $1`,
           [row.id],
         );
@@ -112,7 +112,7 @@ export class OutboxDispatcher {
         const exhausted = row.attemptCount >= MAX_DISPATCH_ATTEMPTS;
         const delaySeconds = Math.min(300, 2 ** row.attemptCount);
         await this.query(
-          `UPDATE outbox_events
+          `UPDATE public.outbox_events
            SET status = $2, last_error_code = 'DISPATCH_FAILED',
                available_at = now() + make_interval(secs => $3::int), updated_at = now()
            WHERE id = $1`,
