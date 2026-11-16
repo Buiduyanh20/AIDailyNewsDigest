@@ -48,7 +48,17 @@ export class OutboxDispatcher {
     if (this.timer) return;
     this.timer = setInterval(() => {
       void this.dispatchOnce().catch((error: unknown) => {
-        this.options.logger?.error({ errorCode: (error as { code?: string }).code ?? "OUTBOX_DISPATCH_FAILED" }, "outbox dispatch failed");
+        this.options.logger?.error(
+          {
+            errorCode: (error as { code?: string }).code ?? "OUTBOX_DISPATCH_FAILED",
+            errorMessage: error instanceof Error ? error.message : String(error),
+            cause:
+              error instanceof Error && error.cause instanceof Error
+                ? error.cause.message
+                : undefined,
+          },
+          "outbox dispatch failed",
+        );
       });
     }, this.options.intervalMs ?? 3_000);
     this.timer.unref?.();
