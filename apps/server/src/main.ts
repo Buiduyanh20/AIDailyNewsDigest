@@ -33,29 +33,6 @@ const REQUIRED_MIGRATION = "004_phase6_digest";
 
 const pool = createDatabasePool();
 
-void (async () => {
-  try {
-    const result = await pool.query<{
-      database: string;
-      userName: string;
-      schema: string;
-      searchPath: string;
-      outboxTable: string | null;
-    }>(`
-      SELECT
-        current_database() AS "database",
-        current_user AS "userName",
-        current_schema() AS "schema",
-        current_setting('search_path') AS "searchPath",
-        to_regclass('public.outbox_events') AS "outboxTable"
-    `);
-
-    console.log("database diagnostic", result.rows[0]);
-  } catch (error) {
-    console.error("database diagnostic failed", error);
-  }
-})();
-
 const queue = new PostgresJobQueue(environment.databaseUrl ?? "");
 const sourceService = createRuntimeSourceService({
   pool,
