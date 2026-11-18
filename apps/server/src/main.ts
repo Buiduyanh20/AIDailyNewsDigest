@@ -97,7 +97,8 @@ const outboxDispatcher = new OutboxDispatcher(
     [DIGEST_READY_EVENT]: enqueueDeliveryFromOutbox,
     [DIGEST_DELIVER_EVENT]: enqueueDeliveryFromOutbox,
   },
-  { logger: consoleProcessingLogger },
+  // Production tables live in "public"; pin it so dispatch never depends on search_path.
+  { schema: "public", logger: consoleProcessingLogger },
 );
 
 const app = buildApp({

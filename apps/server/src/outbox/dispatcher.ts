@@ -20,6 +20,29 @@ type ClaimedRow = QueryResultRow & {
   attemptCount: number;
 };
 
+export type OutboxDispatcherOptions = {
+  /**
+   * PostgreSQL schema that holds `outbox_events`. When set, the table is
+   * schema-qualified (production pins "public"); when omitted, the name is
+   * resolved through the connection's `search_path` (isolated test schemas).
+   */
+  schema?: string;
+  batchSize?: number;
+  intervalMs?: number;
+  logger?: ProcessingLogger;
+};
+
+const SCHEMA_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]{0,62}$/;
+
+/** Returns the (optionally schema-qualified) outbox table reference; never interpolates an unvalidated name. */
+export function outboxTableName(schema?: string): string {
+  if (schema === undefined) return "outbox_events";
+  if (!SCHEMA_IDENTIFIER.test(schema)) {
+    throw new Error("OutboxDispatcher schema must be a plain PostgreSQL identifier.");
+  }
+  return `"${schema}".outbox_events`;
+}
+
 /**
  * Relays transactional outbox rows to the job queue (at-least-once). Rows are
  * claimed with SKIP LOCKED so several dispatchers never double-claim, and a
@@ -29,12 +52,15 @@ type ClaimedRow = QueryResultRow & {
 export class OutboxDispatcher {
   private timer: NodeJS.Timeout | null = null;
   private running: Promise<number> | null = null;
+  private readonly table: string;
 
   constructor(
     private readonly pool: Pool,
     private readonly handlers: Record<string, OutboxHandler>,
-    private readonly options: { batchSize?: number; intervalMs?: number; logger?: ProcessingLogger } = {},
-  ) {}
+    private readonly options: OutboxDispatcherOptions = {},
+  ) {
+    this.table = outboxTableName(options.schema);
+  }
 
   async dispatchOnce(): Promise<number> {
     if (this.running) return this.running;
@@ -83,10 +109,10 @@ export class OutboxDispatcher {
   private async dispatchBatch(): Promise<number> {
     const handledTypes = Object.keys(this.handlers);
     const claimed = await this.query<ClaimedRow>(
-      `UPDATE public.outbox_events
+      `UPDATE ${this.table}
        SET status = 'dispatching', attempt_count = attempt_count + 1, updated_at = now()
        WHERE id IN (
-         SELECT id FROM public.outbox_events
+         SELECT id FROM ${this.table}
          WHERE event_type = ANY($2::text[])
            AND ((status = 'pending' AND available_at <= now())
                 OR (status = 'dispatching' AND updated_at < now() - make_interval(mins => $3::int)))
@@ -103,7 +129,7 @@ export class OutboxDispatcher {
       try {
         await this.handlers[row.eventType]!(row.payload);
         await this.query(
-         `UPDATE public.outbox_events SET status = 'dispatched', processed_at = now(), last_error_code = NULL, updated_at = now()
+          `UPDATE ${this.table} SET status = 'dispatched', processed_at = now(), last_error_code = NULL, updated_at = now()
            WHERE id = $1`,
           [row.id],
         );
@@ -112,7 +138,7 @@ export class OutboxDispatcher {
         const exhausted = row.attemptCount >= MAX_DISPATCH_ATTEMPTS;
         const delaySeconds = Math.min(300, 2 ** row.attemptCount);
         await this.query(
-          `UPDATE public.outbox_events
+          `UPDATE ${this.table}
            SET status = $2, last_error_code = 'DISPATCH_FAILED',
                available_at = now() + make_interval(secs => $3::int), updated_at = now()
            WHERE id = $1`,

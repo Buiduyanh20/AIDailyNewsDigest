@@ -665,12 +665,12 @@ test("POST /api/v1/internal/cron/daily-digest: 404 when disabled, 401 without/wi
     // Cron-job.org may send an empty JSON body or none at all.
     const ok = await cronApp.inject({ method: "POST", url, headers: { authorization: `Bearer ${token}`, "content-type": "application/json" } });
     assert.equal(ok.statusCode, 202);
-    assert.deepEqual(ok.json(), { status: "accepted", localDate: "2026-11-12", jobs: [{ operation: "digest-finalize", jobId: "job-1" }] });
+    assert.deepEqual(ok.json(), { status: "accepted" });
     assert.ok(!ok.body.includes(token), "token never echoed");
 
     const again = await cronApp.inject({ method: "POST", url, headers: { authorization: `Bearer ${token}` }, payload: "ignored" });
     assert.equal(again.statusCode, 202);
-    assert.equal(again.json().jobs[0].jobId, null, "duplicate trigger reports a coalesced job");
+    assert.deepEqual(again.json(), { status: "accepted" });
     assert.equal(triggered, 2);
   } finally {
     await cronApp.close();

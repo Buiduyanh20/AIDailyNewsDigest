@@ -479,7 +479,7 @@ test(
             const jobId = await enqueueArticleProcessing(queue, articleIdFromPayload(payload));
             if (!jobId) throw new Error("not queued");
           },
-        });
+        }, { schema });
         try {
           await queue.start();
           await registerArticleProcessingWorker(queue, h.processor(h.oracle()));
