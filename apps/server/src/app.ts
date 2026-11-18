@@ -634,7 +634,7 @@ export function buildApp(options: {
       }
       const result = await handler.trigger();
       reply.code(202);
-      return { status: "accepted" as const, localDate: result.localDate, jobs: result.operations };
+      return { status: "accepted" as const };
     });
   });
 
